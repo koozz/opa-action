@@ -1,0 +1,11 @@
+---
+name: "OPA action"
+description: "OPA Pull-Request Assessor; Automatically check your structured configuration data using Open Policy Agent."
+author: "Jan van den Berg"
+branding:
+  icon: "shield"
+  color: "green"
+runs:
+  using: 'docker'
+  image: docker://ghcr.io/koozz/opa-action:1.0.0
+  entrypoint: /entrypoint.sh

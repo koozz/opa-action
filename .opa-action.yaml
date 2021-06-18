@@ -1,0 +1,8 @@
+---
+path: policy
+rego:
+  - sources: "Dockerfile"
+    package: "docker"
+    no_fail: true
+  - sources: ".github/workflows/*.yml"
+    package: "workflows"
