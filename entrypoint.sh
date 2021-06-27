@@ -88,7 +88,7 @@ for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]
 	echo "${output}"
 
 	if [ ${status} -ne 0 ]; then
-		if [ "${no_fail}" = "true" ]; then
+		if [ "${no_fail}" != "true" ]; then
 			exitcode=${status}
 		fi
 
