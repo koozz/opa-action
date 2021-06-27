@@ -12,7 +12,7 @@ RUN go get -v github.com/open-policy-agent/conftest@v${CONFTEST_VERSION}
 FROM alpine:${ALPINE_VERSION}
 LABEL org.opencontainers.image.authors="koozz@linux.com"
 COPY --from=build /go/bin/conftest /usr/bin/conftest
-RUN apk add --no-cache jq curl
+RUN apk add --no-cache jq
 WORKDIR /
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

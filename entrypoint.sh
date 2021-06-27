@@ -5,7 +5,6 @@
 # Prerequisites
 # - conftest on $PATH
 # - jq on $PATH
-# - curl on $PATH
 #
 SETTINGS_YAML="opa-action.yaml"
 SETTINGS_REGO="opa-action.rego"
@@ -68,7 +67,6 @@ fi
 
 # Process the configured policies in the configuration
 exitcode=0
-comment=""
 POLICIES=$(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.path')
 for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]'); do
 	package=$(echo "${rego}" | jq -r '.package')
@@ -79,12 +77,10 @@ for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]
 		flags="--no-fail"
 	fi
 
+	echo "::group::{Testing '${sources}' against policies in package '${package}'}"
 	# shellcheck disable=SC2086
 	output=$(conftest test -o "stdout" ${sources} -p "${POLICIES}" -n "${package}" --combine=false ${flags})
 	status=$?
-
-	echo
-	echo "Testing '${sources}' against policies in package '${package}'"
 	echo "${output}"
 
 	if [ ${status} -ne 0 ]; then
@@ -92,33 +88,20 @@ for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]
 			exitcode=${status}
 		fi
 
-		# Store output for GitHub PR comment
-		comment="${comment}<details>\n"
-		comment="${comment}	<summary>\n"
-		comment="${comment}		<code>Testing '${sources}' against policies in package '${package}</code>\n"
-		comment="${comment}	</summary>\n"
-		comment="${comment}	\`\`\`\n"
-		comment="${comment}	${output}\n"
-		comment="${comment}	\`\`\`\n"
-		comment="${comment}</details>\n"
+		# shellcheck disable=SC2086
+		conftest test -o tap ${sources} -p "${POLICIES}" -n "${package}" --combine=false ${flags} | \
+		grep -e "^not ok" | \
+		while read -r _ _ _ _ file _ _ _ failure; do
+			echo "::error file={${file}}::{${failure}}"
+		done
 	fi
+	echo "::endgroup::"
 done
 
-# Last note and post a comment to the PR it's a PR
-if [ -n "${comment}" ]; then
+# Last note for the log
+if [ ${exitcode} -ne 0 ]; then
 	echo
 	echo "Some policy checks have failed."
-
-	if [ "${GITHUB_EVENT_NAME}" = pull_request ]; then
-		COMMENT_BODY="#### Some policy checks have failed\n${comment}"
-		PAYLOAD=$(echo '{}' | jq --arg body "${COMMENT_BODY}" '.body = $body')
-  	COMMENTS_URL=$(jq -r .pull_request.comments_url <"${GITHUB_EVENT_PATH}")
-		curl -sS \
-			-H "Authorization: token ${GITHUB_TOKEN}" \
-			-H 'Content-Type: application/json' \
-			-d "${PAYLOAD}" \
-			"${COMMENTS_URL}"
-	fi
 fi
 
 exit ${exitcode}
