@@ -77,7 +77,7 @@ for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]
 		flags="--no-fail"
 	fi
 
-	echo "::group::{Testing '${sources}' against policies in package '${package}'}"
+	echo "::group::Testing '${sources}' against policies in package '${package}'"
 	# shellcheck disable=SC2086
 	output=$(conftest test -o "stdout" ${sources} -p "${POLICIES}" -n "${package}" --combine=false ${flags})
 	status=$?
@@ -92,7 +92,7 @@ for rego in $(conftest parse "${CONFIG}" --combine | jq -cr '.[].contents.rego[]
 		conftest test -o tap ${sources} -p "${POLICIES}" -n "${package}" --combine=false ${flags} | \
 		grep -e "^not ok" | \
 		while read -r _ _ _ _ file _ _ _ failure; do
-			echo "::error file={${file}}::{${failure}}"
+			echo "::error file=${file}::${failure}"
 		done
 	fi
 	echo "::endgroup::"
