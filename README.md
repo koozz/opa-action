@@ -71,4 +71,4 @@ version.
 
 ## License
 
-GNU Affero General Public License v3.
+Apache License, Version 2.0

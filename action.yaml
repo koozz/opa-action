@@ -7,5 +7,5 @@ branding:
   color: "green"
 runs:
   using: 'docker'
-  image: docker://ghcr.io/koozz/opa-action:1.0.3
+  image: docker://ghcr.io/koozz/opa-action:1.0.4
   entrypoint: /entrypoint.sh
