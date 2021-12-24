@@ -1,5 +1,37 @@
 # OPA-action
 
+I contributed to open-policy-agent/conftest with
+[GitHub flavored output](https://github.com/open-policy-agent/conftest/pull/586).
+
+Now you can simply [use Conftest directly](https://www.conftest.dev/options/#github)
+which makes this action obsolete.
+
+```yaml
+---
+name: Conftest
+
+on:
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    container: openpolicyagent/conftest:latest
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v2
+      - name: Validate Kubernetes policy
+        run: |
+          conftest test -o github -p examples/kubernetes/policy examples/kubernetes/deployment.yaml
+```
+
+The `-o github` will be responsible for annotating the files where policy violations
+are found.
+
+## Archived readme
+
 OPA stands for **O**PA **P**ull-Request **A**ssessor and is a GitHub Action that
 checks files against policies (configured in the same repo). It's using the
 original OPA ([Open Policy Agent](https://www.openpolicyagent.org/)) through the
